@@ -1,0 +1,9 @@
+{
+  "name": "Sundai Portfolio",
+  "short_name": "Sundai",
+  "description": "Modern solutions for complex problems",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2c3e3e",
+  "theme_color": "#d4af37"
+}
