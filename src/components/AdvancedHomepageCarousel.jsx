@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
-import { OrbitControls, PerformanceMonitor } from '@react-three/drei'
+import { Text, OrbitControls, PerformanceMonitor } from '@react-three/drei'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import * as THREE from 'three'
-import CarouselTitle from './CarouselTitle'
 
 // All styling contained within this component
 const styles = {
@@ -22,28 +21,78 @@ const styles = {
     height: '100%'
   },
   
-  subtitle: {
+  // Title and subtitle positioned above 3D area
+  titleContainer: {
     position: 'absolute',
-    bottom: '30px',
+    top: '10%',
     left: '50%',
     transform: 'translateX(-50%)',
-    fontSize: '1.4rem',
+    textAlign: 'center',
+    zIndex: 10,
+    pointerEvents: 'none',
+    userSelect: 'none'
+  },
+  
+  mainTitle: {
+    fontSize: '4rem',
     color: '#d4af37',
-    opacity: 0.9,
+    fontFamily: '"Great Vibes", cursive',
+    fontWeight: '400',
+    letterSpacing: '0.04em',
+    textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)',
+    margin: 0,
+    marginBottom: '10px',
+    opacity: 0.95
+  },
+  
+  separator: {
+    width: '150px',
+    height: '1px',
+    backgroundColor: '#d4af37',
+    margin: '20px auto',
+    opacity: 0.6,
+    boxShadow: '0 0 10px rgba(212, 175, 55, 0.5)'
+  },
+  
+  authorName: {
+    fontSize: '1.0rem',
+    color: '#d4af37',
+    fontFamily: '"Great Vibes", cursive',
+    fontWeight: '200',
+    letterSpacing: '0.2em',
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
+    margin: 0,
+    opacity: 0.8
+  },
+  
+  subtitle: {
+    position: 'absolute',
+    bottom: '100px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: '.8rem',
+    color: '#d4af37',
+    opacity: 0.5,
     textAlign: 'center',
     pointerEvents: 'none',
     fontFamily: '"Great Vibes", cursive',
-    fontWeight: '400',
-    letterSpacing: '0.02em',
+    fontWeight: '100',
+    letterSpacing: '0.04em',
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
     zIndex: 10
   },
   
   // Mobile styles
   mobile: {
+    mainTitle: {
+      fontSize: '2.5rem'
+    },
+    authorName: {
+      fontSize: '1rem'
+    },
     subtitle: {
       fontSize: '1.1rem',
-      bottom: '20px',
+      bottom: '40px',
       padding: '0 1rem'
     }
   }
@@ -66,45 +115,6 @@ const useResponsiveStyles = () => {
   return { isMobile }
 }
 
-// Custom Text component using troika-three-text
-const TroikaText = ({ children, fontSize = 0.3, color = '#ffffff', position = [0, 0, 0], rotation = [0, 0, 0], fontFamily = 'Arial', onClick, ...props }) => {
-  const meshRef = useRef()
-  
-  useEffect(() => {
-    if (meshRef.current) {
-      // Import troika and configure
-      import('troika-three-text').then(({ Text3D }) => {
-        if (meshRef.current) {
-          meshRef.current.text = children
-          meshRef.current.fontSize = fontSize
-          meshRef.current.color = color
-          meshRef.current.fontFamily = fontFamily
-          meshRef.current.textAlign = 'center'
-          meshRef.current.anchorX = 'center'
-          meshRef.current.anchorY = 'middle'
-          meshRef.current.outlineWidth = 0.02
-          meshRef.current.outlineColor = '#2c3e3e'
-          
-          // Sync and update
-          meshRef.current.sync()
-        }
-      })
-    }
-  }, [children, fontSize, color, fontFamily])
-  
-  return (
-    <mesh 
-      ref={meshRef} 
-      position={position} 
-      rotation={rotation}
-      onClick={onClick}
-      {...props}
-    >
-      <meshStandardMaterial color={color} />
-    </mesh>
-  )
-}
-
 // Optimized GLB Carousel Model Component
 const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemClick }) => {
   const gltf = useLoader(GLTFLoader, url)
@@ -120,7 +130,7 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
   useFrame((state) => {
     if (modelRef.current) {
       // Gentle rotation
-      modelRef.current.rotation.y = state.clock.elapsedTime * 0.1
+      modelRef.current.rotation.y = state.clock.elapsedTime * 0.5
     }
   })
 
@@ -166,42 +176,58 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
   }, [gl, handleClick])
 
   return (
-    <group ref={modelRef} position={[0, -2, 0]}>
+    <group ref={modelRef} position={[.2, -.2, 0]}>
       <primitive object={gltf.scene} scale={[2, 2, 2]} />
       
-      {/* Text labels positioned around the carousel using troika */}
+      {/* Text labels positioned closer to carousel elements with stacked characters */}
       {items.map((item, index) => {
         const angle = (index / items.length) * Math.PI * 2
-        const radius = 3
+        const radius = 1.7 // Moved closer to carousel
         const x = Math.sin(angle) * radius
         const z = Math.cos(angle) * radius
         
+        // Make text face outward from carousel center
+        const yRotation = angle
+        
+        // Split title into individual characters and stack them vertically
+        const characters = item.title.split('')
+        const totalHeight = characters.length * 0.08 // Decreased spacing between characters
+        const startY = totalHeight / 4 // Center the stack
+        
         return (
-          <TroikaText
-            key={item.title}
-            position={[x, 0, z]}
-            rotation={[0, -angle, 0]}
-            fontSize={0.3}
-            color={activeIndex === index ? "#ffd700" : "#d4af37"}
-            fontFamily="Dancing Script, cursive"
-            onClick={() => onItemClick(index)}
-          >
-            {item.title}
-          </TroikaText>
+          <group key={item.title} position={[x, 0, z]} rotation={[0, yRotation, 0]}>
+            {characters.map((char, charIndex) => (
+              <Text
+                key={charIndex}
+                position={[0, startY - (charIndex * 0.16), 0]}
+                rotation={[0, 0, 0]}
+                fontSize={0.17}
+                color={activeIndex === index ? "#ffd700" : "#d4af37"}
+                fontFamily="serif"
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.01}
+                outlineColor="#2c3e3e"
+                onClick={() => onItemClick(index)}
+              >
+                {char}
+              </Text>
+            ))}
+          </group>
         )
       })}
     </group>
   )
 }
 
-// Main 3D Scene with both title and carousel
+// Main 3D Scene with just the carousel (no 3D title)
 const MainScene = ({ items, activeIndex, onItemClick }) => {
   return (
     <>
       {/* Optimized lighting setup */}
       <ambientLight intensity={0.6} />
       <directionalLight 
-        position={[10, 10, 5]} 
+        position={[5, 10, 5]} 
         intensity={1.0} 
         castShadow 
         shadow-mapSize-width={1024}
@@ -211,10 +237,7 @@ const MainScene = ({ items, activeIndex, onItemClick }) => {
       <pointLight position={[-10, -10, -5]} intensity={0.6} color="#d4af37" />
       
       <React.Suspense fallback={null}>
-        {/* 3D Title positioned above the carousel */}
-        <CarouselTitle />
-        
-        {/* Carousel model below the title */}
+        {/* Only the carousel model - title is now HTML */}
         <CarouselGLBModel 
           items={items}
           activeIndex={activeIndex}
@@ -274,7 +297,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
       route: "about"
     },
     {
-      title: "Consulting",
+      title: "Consult",
       type: "consulting",
       description: "Strategic technology consulting for digital transformation, AI implementation, and system optimization.",
       route: "consulting"
@@ -291,13 +314,23 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
     setPerformanceSettings(settings)
   }, [])
 
-  // Memoize camera settings - positioned to see both title and carousel
+  // Memoize camera settings - positioned to see the carousel
   const cameraSettings = useMemo(() => ({
-    position: [6, 2, 0],
-    fov: isMobile ? 70 : 60
+    position: [6, -.5, 0],
+    fov: isMobile ? 80 : 50
   }), [isMobile])
 
-  // Get responsive subtitle style
+  // Get responsive styles
+  const titleStyles = {
+    ...styles.mainTitle,
+    ...(isMobile ? styles.mobile.mainTitle : {})
+  }
+  
+  const authorStyles = {
+    ...styles.authorName,
+    ...(isMobile ? styles.mobile.authorName : {})
+  }
+  
   const subtitleStyle = {
     ...styles.subtitle,
     ...(isMobile ? styles.mobile.subtitle : {})
@@ -305,7 +338,18 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
 
   return (
     <div style={styles.homepage}>
-      {/* Single Canvas with integrated title and carousel */}
+      {/* HTML Title and Author positioned above 3D area */}
+      <div style={styles.titleContainer}>
+        <h1 style={titleStyles}>
+          Sundai
+        </h1>
+        <div style={styles.separator}></div>
+        <p style={authorStyles}>
+          By Christian Okeke
+        </p>
+      </div>
+      
+      {/* 3D Canvas with just the carousel */}
       <Canvas 
         camera={cameraSettings}
         shadows={performanceSettings.quality === 'high'}
@@ -327,7 +371,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
         />
         <OrbitControls 
           enablePan={false} 
-          enableZoom={true}
+          enableZoom={false}
           enableRotate={true}
           autoRotate={false}
           maxPolarAngle={Math.PI * 0.8}
@@ -342,7 +386,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
         />
       </Canvas>
       
-      {/* Subtle instruction text */}
+      {/* Instruction text at bottom */}
       <div style={subtitleStyle}>
         Drag to explore • Click sections to navigate
       </div>
@@ -351,4 +395,3 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
 }
 
 export default AdvancedHomepageCarousel
-
