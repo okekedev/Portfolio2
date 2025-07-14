@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import HomepageCarousel from './components/HomepageCarousel'
+import AdvancedHomepageCarousel from './components/AdvancedHomepageCarousel'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -11,23 +11,22 @@ function App() {
   const renderView = () => {
     switch(currentView) {
       case 'projects':
-        return <div className="view-placeholder">Projects Carousel Coming Soon</div>
+        return <div>Projects Coming Soon</div>
       case 'contact':
-        return <div className="view-placeholder">Contact Form Coming Soon</div>
+        return <div>Contact Coming Soon</div>
+      case 'about':
+        return <div>About Coming Soon</div>
       case 'consulting':
-        return <div className="view-placeholder">Consulting Info Coming Soon</div>
+        return <div>Consulting Coming Soon</div>
       default:
-        return <HomepageCarousel onNavigate={handleNavigation} />
+        return <AdvancedHomepageCarousel onNavigate={handleNavigation} />
     }
   }
 
   return (
-    <div className="app">
+    <div>
       {currentView !== 'home' && (
-        <button 
-          className="back-btn"
-          onClick={() => setCurrentView('home')}
-        >
+        <button onClick={() => setCurrentView('home')}>
           ← Back to Home
         </button>
       )}
