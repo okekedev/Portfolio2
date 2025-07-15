@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import AdvancedHomepageCarousel from './components/AdvancedHomepageCarousel'
 import ContactPage from './components/ContactPage'
-import AboutPage from './components/AboutPage' // Add this import
+import AboutPage from './components/AboutPage'
+import ProjectsPage from './components/ProjectsPage'
+import ConsultingPage from './components/ConsultingPage'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -17,26 +19,26 @@ function App() {
   const renderView = () => {
     switch(currentView) {
       case 'projects':
-        return <div>Projects Coming Soon</div>
+        return <ProjectsPage onBack={handleBackToHome} />
       case 'contact':
         return <ContactPage onBack={handleBackToHome} />
       case 'about':
-        return <AboutPage onBack={handleBackToHome} /> // Use the new AboutPage component
+        return <AboutPage onBack={handleBackToHome} />
       case 'consulting':
-        return <div>Consulting Coming Soon</div>
+        return <ConsultingPage onBack={handleBackToHome} onNavigate={handleNavigation} />
       default:
         return <AdvancedHomepageCarousel onNavigate={handleNavigation} />
     }
   }
 
   return (
-    <div>
-      {/* Remove the generic back button since ContactPage and AboutPage have their own */}
-      {currentView !== 'home' && currentView !== 'contact' && currentView !== 'about' && (
-        <button onClick={() => setCurrentView('home')}>
-          ← Back to Home
-        </button>
-      )}
+    <div style={{ 
+      width: '100%', 
+      maxWidth: '100vw', 
+      overflowX: 'hidden', 
+      boxSizing: 'border-box' 
+    }}>
+      {/* All pages now have their own back buttons, so no generic one needed */}
       {renderView()}
     </div>
   )

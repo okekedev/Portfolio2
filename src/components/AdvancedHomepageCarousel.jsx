@@ -9,16 +9,24 @@ const styles = {
   homepage: {
     height: '100vh',
     width: '100vw',
+    maxHeight: '100vh',
+    maxWidth: '100vw',
     background: 'linear-gradient(135deg, #2c3e3e 0%, #1a2b2b 100%)',
     color: '#f5f3f0',
     fontFamily: '"Dancing Script", "Great Vibes", "Pacifico", cursive, sans-serif',
     overflow: 'hidden',
-    position: 'relative'
+    overflowX: 'hidden',
+    overflowY: 'hidden',
+    position: 'relative',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box'
   },
   
   canvas: {
     width: '100%',
-    height: '100%'
+    height: '100%',
+    display: 'block'
   },
 
   // Gold flakes animation
@@ -29,7 +37,8 @@ const styles = {
     width: '100%',
     height: '100%',
     pointerEvents: 'none',
-    zIndex: 1
+    zIndex: 1,
+    overflow: 'hidden'
   },
 
   goldFlake: {
@@ -46,7 +55,7 @@ const styles = {
     top: '20px',
     right: '20px',
     zIndex: 20,
-    background: 'rgba(44, 62, 62, 0.95)', // Increased opacity
+    background: 'rgba(44, 62, 62, 0.95)',
     border: '1px solid #d4af37',
     borderRadius: '8px',
     padding: '12px',
@@ -59,11 +68,12 @@ const styles = {
     height: '48px',
     backdropFilter: 'blur(10px)',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    boxSizing: 'border-box'
   },
 
   hamburgerMenuButtonHover: {
-    background: 'rgba(212, 175, 55, 0.3)', // Increased opacity
+    background: 'rgba(212, 175, 55, 0.3)',
     transform: 'scale(1.05)',
     boxShadow: '0 6px 16px rgba(212, 175, 55, 0.3)'
   },
@@ -78,9 +88,9 @@ const styles = {
   },
 
   menuOverlay: {
-    position: 'absolute',
-    top: '0',
-    right: '0',
+    position: 'fixed',
+    top: 0,
+    left: 0,
     width: '100vw',
     height: '100vh',
     background: 'rgba(26, 43, 43, 0.95)',
@@ -90,7 +100,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     backdropFilter: 'blur(10px)',
-    animation: 'fadeIn 0.3s ease'
+    animation: 'fadeIn 0.3s ease',
+    overflow: 'hidden',
+    boxSizing: 'border-box'
   },
 
   menuItem: {
@@ -105,7 +117,8 @@ const styles = {
     borderRadius: '12px',
     transition: 'all 0.3s ease',
     minWidth: '200px',
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
+    boxSizing: 'border-box'
   },
 
   menuItemHover: {
@@ -140,7 +153,8 @@ const styles = {
     justifyContent: 'center',
     background: 'rgba(44, 62, 62, 0.8)',
     border: '1px solid #d4af37',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    boxSizing: 'border-box'
   },
   
   // Title and subtitle positioned above 3D area
@@ -152,7 +166,10 @@ const styles = {
     textAlign: 'center',
     zIndex: 10,
     pointerEvents: 'none',
-    userSelect: 'none'
+    userSelect: 'none',
+    width: '100%',
+    maxWidth: '100vw',
+    boxSizing: 'border-box'
   },
   
   mainTitle: {
@@ -192,7 +209,7 @@ const styles = {
     bottom: '100px',
     left: '50%',
     transform: 'translateX(-50%)',
-    fontSize: '.8rem',
+    fontSize: '0.8rem',
     color: '#d4af37',
     opacity: 0.5,
     textAlign: 'center',
@@ -201,11 +218,18 @@ const styles = {
     fontWeight: '100',
     letterSpacing: '0.04em',
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-    zIndex: 10
+    zIndex: 10,
+    width: '100%',
+    maxWidth: '100vw',
+    boxSizing: 'border-box'
   },
   
   // Mobile styles
   mobile: {
+    titleContainer: {
+      top: '8%',
+      padding: '0 20px'
+    },
     mainTitle: {
       fontSize: '2.5rem'
     },
@@ -213,9 +237,17 @@ const styles = {
       fontSize: '1rem'
     },
     subtitle: {
-      fontSize: '1.1rem',
-      bottom: '40px',
+      fontSize: '0.9rem',
+      bottom: '60px',
       padding: '0 1rem'
+    },
+    menuItem: {
+      padding: '15px 30px',
+      fontSize: '1.5rem',
+      minWidth: '160px'
+    },
+    menuTitle: {
+      fontSize: '2rem'
     }
   }
 }
@@ -227,15 +259,15 @@ const GoldFlakes = () => {
   useEffect(() => {
     const generateFlakes = () => {
       const newFlakes = []
-      for (let i = 0; i < 40; i++) { // More flakes than contact page
+      for (let i = 0; i < 40; i++) {
         newFlakes.push({
           id: i,
           x: Math.random() * 100,
           y: Math.random() * 100,
-          size: Math.random() * 5 + 1.5, // Slightly larger range
+          size: Math.random() * 5 + 1.5,
           delay: Math.random() * 8,
-          duration: Math.random() * 4 + 6, // Slower floating
-          direction: Math.random() > 0.5 ? 1 : -1 // Random direction
+          duration: Math.random() * 4 + 6,
+          direction: Math.random() > 0.5 ? 1 : -1
         })
       }
       setFlakes(newFlakes)
@@ -262,6 +294,30 @@ const GoldFlakes = () => {
       ))}
       <style>
         {`
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            max-height: 100vh;
+            max-width: 100vw;
+          }
+          
+          #root {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+          }
+          
           @keyframes float {
             0%, 100% { 
               transform: translateY(0px) translateX(0px) rotate(0deg); 
@@ -279,6 +335,11 @@ const GoldFlakes = () => {
               transform: translateY(-35px) translateX(15px) rotate(270deg); 
               opacity: 0.5; 
             }
+          }
+          
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
         `}
       </style>
@@ -306,6 +367,7 @@ const useResponsiveStyles = () => {
 // Menu Overlay Component
 const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
   const [hoveredItem, setHoveredItem] = useState(null)
+  const { isMobile } = useResponsiveStyles()
 
   if (!isOpen) return null
 
@@ -333,7 +395,12 @@ const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
       </div>
 
       {/* Menu title */}
-      <div style={styles.menuTitle}>Navigation</div>
+      <div style={{
+        ...styles.menuTitle,
+        ...(isMobile ? styles.mobile.menuTitle : {})
+      }}>
+        Navigation
+      </div>
 
       {/* Menu items */}
       {items.map((item, index) => (
@@ -341,6 +408,7 @@ const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
           key={item.route}
           style={{
             ...styles.menuItem,
+            ...(isMobile ? styles.mobile.menuItem : {}),
             ...(hoveredItem === index ? styles.menuItemHover : {})
           }}
           onClick={() => handleItemClick(item.route)}
@@ -449,7 +517,7 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
   }, [gltf])
 
   return (
-    <group ref={modelRef} position={[.2, -.2, 0]}>
+    <group ref={modelRef} position={[-1.1, -.2, 0]}>
       {/* The carousel model - no click handlers here */}
       <primitive object={gltf.scene} scale={[2, 2, 2]} />
       
@@ -620,6 +688,11 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
   }), [isMobile])
 
   // Get responsive styles
+  const titleContainerStyles = {
+    ...styles.titleContainer,
+    ...(isMobile ? styles.mobile.titleContainer : {})
+  }
+  
   const titleStyles = {
     ...styles.mainTitle,
     ...(isMobile ? styles.mobile.mainTitle : {})
@@ -652,7 +725,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
       />
 
       {/* HTML Title and Author positioned above 3D area */}
-      <div style={styles.titleContainer}>
+      <div style={titleContainerStyles}>
         <h1 style={titleStyles}>
           Sundai
         </h1>

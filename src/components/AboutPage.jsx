@@ -3,14 +3,17 @@ import React, { useState, useCallback, useEffect } from 'react'
 // All styling contained within this component
 const styles = {
   aboutPage: {
-    height: '100vh',
-    width: '100vw',
+    minHeight: '100vh',
+    width: '100%',
+    maxWidth: '100vw',
     background: 'linear-gradient(135deg, #2c3e3e 0%, #1a2b2b 100%)',
     color: '#f5f3f0',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     overflow: 'auto',
+    overflowX: 'hidden',
     position: 'relative',
-    padding: '20px'
+    padding: '20px',
+    boxSizing: 'border-box'
   },
 
   // Gold flakes animation
@@ -36,11 +39,13 @@ const styles = {
     position: 'relative',
     zIndex: 10,
     maxWidth: '1200px',
+    width: '100%',
     margin: '0 auto',
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    boxSizing: 'border-box'
   },
 
   header: {
@@ -92,9 +97,7 @@ const styles = {
   // Node styles
   node: {
     background: 'rgba(44, 62, 62, 0.9)',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: '#d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '16px',
     padding: '25px',
     cursor: 'pointer',
@@ -103,7 +106,8 @@ const styles = {
     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
     textAlign: 'center',
     minWidth: '200px',
-    position: 'relative'
+    position: 'relative',
+    boxSizing: 'border-box'
   },
 
   nodeActive: {
@@ -115,6 +119,7 @@ const styles = {
 
   nodeHover: {
     transform: 'translateY(-5px)',
+    borderColor: '#f4d03f',
     boxShadow: '0 12px 28px rgba(212, 175, 55, 0.3)'
   },
 
@@ -146,9 +151,7 @@ const styles = {
     width: '100%',
     maxWidth: '1000px',
     background: 'rgba(44, 62, 62, 0.95)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '20px',
     padding: '40px',
     backdropFilter: 'blur(15px)',
@@ -156,7 +159,8 @@ const styles = {
     marginTop: '40px',
     opacity: 0,
     transform: 'translateY(20px)',
-    animation: 'fadeInUp 0.6s ease forwards'
+    animation: 'fadeInUp 0.6s ease forwards',
+    boxSizing: 'border-box'
   },
 
   expandedTitle: {
@@ -178,17 +182,16 @@ const styles = {
 
   skillCategory: {
     background: 'rgba(26, 43, 43, 0.6)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    border: '2px solid #d4af37',
     borderRadius: '12px',
     padding: '20px',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    boxSizing: 'border-box'
   },
 
   skillCategoryHover: {
     background: 'rgba(26, 43, 43, 0.8)',
-    borderColor: 'rgba(212, 175, 55, 0.5)',
+    borderColor: '#f4d03f',
     transform: 'translateY(-2px)',
     boxShadow: '0 6px 20px rgba(212, 175, 55, 0.2)'
   },
@@ -213,13 +216,8 @@ const styles = {
     color: '#f5f3f0',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     fontWeight: '400',
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    paddingLeft: '0px',
-    paddingRight: '0px',
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'rgba(212, 175, 55, 0.1)',
+    padding: '8px 0',
+    borderBottom: '1px solid rgba(212, 175, 55, 0.1)',
     opacity: 0.9,
     cursor: 'pointer',
     transition: 'all 0.3s ease',
@@ -239,9 +237,7 @@ const styles = {
     left: '50%',
     transform: 'translateX(-50%)',
     background: 'rgba(44, 62, 62, 0.95)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '8px',
     padding: '10px 15px',
     fontSize: '0.85rem',
@@ -346,9 +342,7 @@ const styles = {
     top: '20px',
     left: '20px',
     background: 'rgba(44, 62, 62, 0.9)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '8px',
     padding: '12px 24px',
     color: '#d4af37',
@@ -364,9 +358,7 @@ const styles = {
   // Reset button
   resetButton: {
     background: 'rgba(212, 175, 55, 0.1)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '8px',
     padding: '12px 24px',
     color: '#d4af37',
@@ -395,8 +387,8 @@ const styles = {
       padding: '20px'
     },
     expandedContent: {
-      padding: '25px',
-      margin: '20px'
+      padding: '25px 20px',
+      margin: '20px 10px'
     },
     skillsGrid: {
       gridTemplateColumns: '1fr'
@@ -701,10 +693,12 @@ const AboutPage = ({ onBack }) => {
           onClick={handleReset}
           onMouseEnter={(e) => {
             e.target.style.background = 'rgba(212, 175, 55, 0.2)'
+            e.target.style.borderColor = '#f4d03f'
             e.target.style.transform = 'translateY(-2px)'
           }}
           onMouseLeave={(e) => {
             e.target.style.background = 'rgba(212, 175, 55, 0.1)'
+            e.target.style.borderColor = '#d4af37'
             e.target.style.transform = 'translateY(0)'
           }}
         >
@@ -724,10 +718,12 @@ const AboutPage = ({ onBack }) => {
         style={styles.backButton}
         onMouseEnter={(e) => {
           e.target.style.background = 'rgba(212, 175, 55, 0.2)'
+          e.target.style.borderColor = '#f4d03f'
           e.target.style.transform = 'translateX(-5px)'
         }}
         onMouseLeave={(e) => {
           e.target.style.background = 'rgba(44, 62, 62, 0.9)'
+          e.target.style.borderColor = '#d4af37'
           e.target.style.transform = 'translateX(0)'
         }}
       >

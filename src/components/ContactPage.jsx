@@ -3,16 +3,19 @@ import React, { useState, useCallback, useEffect } from 'react'
 // All styling contained within this component
 const styles = {
   contactPage: {
-    height: '100vh',
-    width: '100vw',
+    minHeight: '100vh',
+    width: '100%',
+    maxWidth: '100vw',
     background: 'linear-gradient(135deg, #2c3e3e 0%, #1a2b2b 100%)',
     color: '#f5f3f0',
-    fontFamily: '"Dancing Script", "Great Vibes", "Pacifico", cursive, sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     overflow: 'hidden',
+    overflowX: 'hidden',
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    boxSizing: 'border-box'
   },
 
   // Gold flakes animation
@@ -39,14 +42,16 @@ const styles = {
     position: 'relative',
     zIndex: 10,
     maxWidth: '600px',
-    width: '90%',
+    width: '100%',
+    margin: '0 auto',
     background: 'rgba(44, 62, 62, 0.95)',
-    border: '1px solid #d4af37',
+    border: '2px solid #d4af37',
     borderRadius: '20px',
     padding: '60px',
     backdropFilter: 'blur(15px)',
     boxShadow: '0 15px 35px rgba(0, 0, 0, 0.4)',
-    textAlign: 'center'
+    textAlign: 'center',
+    boxSizing: 'border-box'
   },
 
   title: {
@@ -63,8 +68,9 @@ const styles = {
   subtitle: {
     fontSize: '1.1rem',
     color: '#f5f3f0',
-    fontFamily: '"Dancing Script", cursive',
-    opacity: 0.8,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '300',
+    opacity: 0.9,
     lineHeight: '1.6',
     marginBottom: '40px'
   },
@@ -92,7 +98,7 @@ const styles = {
 
   stepDotInactive: {
     background: 'rgba(212, 175, 55, 0.3)',
-    border: '1px solid rgba(212, 175, 55, 0.5)'
+    border: '2px solid rgba(212, 175, 55, 0.5)'
   },
 
   stepDotCompleted: {
@@ -127,8 +133,10 @@ const styles = {
     fontSize: '2rem',
     color: '#d4af37',
     fontFamily: '"Great Vibes", cursive',
+    fontWeight: '400',
+    letterSpacing: '0.04em',
     marginBottom: '30px',
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
+    textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)',
     opacity: 0,
     transform: 'translateY(20px)',
     animation: 'fadeInUp 0.6s ease forwards'
@@ -143,12 +151,13 @@ const styles = {
   input: {
     width: '100%',
     padding: '20px',
-    fontSize: '1.2rem',
+    fontSize: '1.1rem',
     color: '#f5f3f0',
     background: 'rgba(26, 43, 43, 0.8)',
     border: '2px solid rgba(212, 175, 55, 0.3)',
     borderRadius: '12px',
-    fontFamily: '"Dancing Script", cursive',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '400',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(5px)',
     boxSizing: 'border-box',
@@ -168,12 +177,14 @@ const styles = {
   textarea: {
     width: '100%',
     padding: '20px',
-    fontSize: '1.2rem',
+    fontSize: '1.1rem',
     color: '#f5f3f0',
     background: 'rgba(26, 43, 43, 0.8)',
     border: '2px solid rgba(212, 175, 55, 0.3)',
     borderRadius: '12px',
-    fontFamily: '"Dancing Script", cursive',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '400',
+    lineHeight: '1.6',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(5px)',
     minHeight: '150px',
@@ -197,14 +208,14 @@ const styles = {
 
   button: {
     padding: '15px 30px',
-    fontSize: '1.1rem',
-    fontFamily: '"Dancing Script", cursive',
-    fontWeight: '600',
+    fontSize: '1rem',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '500',
     borderRadius: '10px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.8px',
     border: 'none'
   },
 
@@ -228,7 +239,7 @@ const styles = {
   secondaryButton: {
     color: '#d4af37',
     background: 'rgba(212, 175, 55, 0.1)',
-    border: '1px solid #d4af37'
+    border: '2px solid #d4af37'
   },
 
   secondaryButtonHover: {
@@ -249,22 +260,26 @@ const styles = {
     padding: '15px',
     background: 'rgba(26, 43, 43, 0.5)',
     borderRadius: '8px',
-    border: '1px solid rgba(212, 175, 55, 0.2)'
+    border: '2px solid rgba(212, 175, 55, 0.3)'
   },
 
   summaryLabel: {
     fontSize: '0.9rem',
     color: '#d4af37',
-    fontFamily: '"Dancing Script", cursive',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '500',
     marginBottom: '5px',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px'
+    letterSpacing: '0.8px'
   },
 
   summaryValue: {
     fontSize: '1.1rem',
     color: '#f5f3f0',
-    fontFamily: '"Dancing Script", cursive',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '400',
+    lineHeight: '1.6',
+    opacity: 0.9,
     wordBreak: 'break-word'
   },
 
@@ -283,24 +298,50 @@ const styles = {
   },
 
   successText: {
-    fontSize: '1.5rem',
+    fontSize: '1.8rem',
     color: '#d4af37',
     fontFamily: '"Great Vibes", cursive',
-    marginBottom: '10px'
+    fontWeight: '400',
+    letterSpacing: '0.04em',
+    textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)',
+    marginBottom: '15px'
   },
 
   successSubtext: {
-    fontSize: '1rem',
+    fontSize: '1.1rem',
     color: '#f5f3f0',
-    fontFamily: '"Dancing Script", cursive',
-    opacity: 0.8
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '300',
+    lineHeight: '1.6',
+    opacity: 0.9
+  },
+
+  // Back to Home Button
+  backButton: {
+    position: 'absolute',
+    top: '20px',
+    left: '20px',
+    background: 'rgba(44, 62, 62, 0.9)',
+    border: '2px solid #d4af37',
+    borderRadius: '8px',
+    padding: '12px 24px',
+    color: '#d4af37',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontWeight: '500',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    zIndex: 20
   },
 
   // Mobile styles
   mobile: {
     container: {
-      padding: '40px 30px',
-      margin: '20px'
+      padding: '40px 20px',
+      margin: '0 15px',
+      width: 'calc(100% - 30px)',
+      maxWidth: '500px'
     },
     title: {
       fontSize: '2.2rem'
@@ -309,12 +350,18 @@ const styles = {
       fontSize: '1.6rem'
     },
     input: {
-      fontSize: '1.1rem',
+      fontSize: '1rem',
       padding: '15px'
     },
     textarea: {
-      fontSize: '1.1rem',
+      fontSize: '1rem',
       padding: '15px'
+    },
+    successText: {
+      fontSize: '1.5rem'
+    },
+    successSubtext: {
+      fontSize: '1rem'
     }
   }
 }
@@ -509,8 +556,10 @@ const ContactPage = ({ onBack }) => {
         <div style={containerStyles}>
           <div style={styles.successMessage}>
             <div style={styles.successIcon}>✨</div>
-            <div style={styles.successText}>Message Sent!</div>
-            <div style={styles.successSubtext}>
+            <div style={{...styles.successText, ...(isMobile ? styles.mobile.successText : {})}}>
+              Message Sent!
+            </div>
+            <div style={{...styles.successSubtext, ...(isMobile ? styles.mobile.successSubtext : {})}}>
               Your email client should open shortly. I'll get back to you soon!
             </div>
             <div style={{...styles.buttonContainer, marginTop: '40px'}}>
@@ -706,22 +755,7 @@ const ContactPage = ({ onBack }) => {
       {onBack && (
         <button
           onClick={onBack}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            background: 'rgba(44, 62, 62, 0.9)',
-            border: '1px solid #d4af37',
-            borderRadius: '8px',
-            padding: '10px 20px',
-            color: '#d4af37',
-            fontFamily: '"Dancing Script", cursive',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            backdropFilter: 'blur(10px)',
-            zIndex: 20
-          }}
+          style={styles.backButton}
           onMouseEnter={(e) => {
             e.target.style.background = 'rgba(212, 175, 55, 0.2)'
             e.target.style.transform = 'translateX(-5px)'
