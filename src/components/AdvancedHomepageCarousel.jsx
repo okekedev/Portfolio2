@@ -20,6 +20,128 @@ const styles = {
     width: '100%',
     height: '100%'
   },
+
+  // Gold flakes animation
+  goldFlakesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    zIndex: 1
+  },
+
+  goldFlake: {
+    position: 'absolute',
+    background: '#d4af37',
+    borderRadius: '50%',
+    opacity: 0.4,
+    animation: 'float 8s infinite ease-in-out'
+  },
+
+  // Hamburger menu styles (always visible)
+  hamburgerMenuButton: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    zIndex: 20,
+    background: 'rgba(44, 62, 62, 0.95)', // Increased opacity
+    border: '1px solid #d4af37',
+    borderRadius: '8px',
+    padding: '12px',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '48px',
+    height: '48px',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+  },
+
+  hamburgerMenuButtonHover: {
+    background: 'rgba(212, 175, 55, 0.3)', // Increased opacity
+    transform: 'scale(1.05)',
+    boxShadow: '0 6px 16px rgba(212, 175, 55, 0.3)'
+  },
+
+  hamburgerLine: {
+    width: '20px',
+    height: '2px',
+    backgroundColor: '#d4af37',
+    margin: '2px 0',
+    transition: 'all 0.3s ease',
+    borderRadius: '1px'
+  },
+
+  menuOverlay: {
+    position: 'absolute',
+    top: '0',
+    right: '0',
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(26, 43, 43, 0.95)',
+    zIndex: 19,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backdropFilter: 'blur(10px)',
+    animation: 'fadeIn 0.3s ease'
+  },
+
+  menuItem: {
+    padding: '20px 40px',
+    margin: '10px 0',
+    fontSize: '1.8rem',
+    color: '#d4af37',
+    fontFamily: '"Great Vibes", cursive',
+    cursor: 'pointer',
+    textAlign: 'center',
+    border: '1px solid transparent',
+    borderRadius: '12px',
+    transition: 'all 0.3s ease',
+    minWidth: '200px',
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+  },
+
+  menuItemHover: {
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    border: '1px solid #d4af37',
+    transform: 'scale(1.05)',
+    boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+  },
+
+  menuTitle: {
+    fontSize: '2.5rem',
+    color: '#d4af37',
+    fontFamily: '"Great Vibes", cursive',
+    marginBottom: '40px',
+    textAlign: 'center',
+    textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)'
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    fontSize: '2rem',
+    color: '#d4af37',
+    cursor: 'pointer',
+    padding: '10px',
+    borderRadius: '50%',
+    width: '48px',
+    height: '48px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(44, 62, 62, 0.8)',
+    border: '1px solid #d4af37',
+    transition: 'all 0.3s ease'
+  },
   
   // Title and subtitle positioned above 3D area
   titleContainer: {
@@ -98,6 +220,72 @@ const styles = {
   }
 }
 
+// Gold Flakes Animation Component
+const GoldFlakes = () => {
+  const [flakes, setFlakes] = useState([])
+
+  useEffect(() => {
+    const generateFlakes = () => {
+      const newFlakes = []
+      for (let i = 0; i < 40; i++) { // More flakes than contact page
+        newFlakes.push({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          size: Math.random() * 5 + 1.5, // Slightly larger range
+          delay: Math.random() * 8,
+          duration: Math.random() * 4 + 6, // Slower floating
+          direction: Math.random() > 0.5 ? 1 : -1 // Random direction
+        })
+      }
+      setFlakes(newFlakes)
+    }
+
+    generateFlakes()
+  }, [])
+
+  return (
+    <div style={styles.goldFlakesContainer}>
+      {flakes.map(flake => (
+        <div
+          key={flake.id}
+          style={{
+            ...styles.goldFlake,
+            left: `${flake.x}%`,
+            top: `${flake.y}%`,
+            width: `${flake.size}px`,
+            height: `${flake.size}px`,
+            animationDelay: `${flake.delay}s`,
+            animationDuration: `${flake.duration}s`
+          }}
+        />
+      ))}
+      <style>
+        {`
+          @keyframes float {
+            0%, 100% { 
+              transform: translateY(0px) translateX(0px) rotate(0deg); 
+              opacity: 0.3; 
+            }
+            25% { 
+              transform: translateY(-25px) translateX(10px) rotate(90deg); 
+              opacity: 0.6; 
+            }
+            50% { 
+              transform: translateY(-15px) translateX(-5px) rotate(180deg); 
+              opacity: 0.8; 
+            }
+            75% { 
+              transform: translateY(-35px) translateX(15px) rotate(270deg); 
+              opacity: 0.5; 
+            }
+          }
+        `}
+      </style>
+    </div>
+  )
+}
+
 // Hook for responsive styles
 const useResponsiveStyles = () => {
   const [isMobile, setIsMobile] = useState(false)
@@ -115,44 +303,134 @@ const useResponsiveStyles = () => {
   return { isMobile }
 }
 
+// Menu Overlay Component
+const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
+  const [hoveredItem, setHoveredItem] = useState(null)
+
+  if (!isOpen) return null
+
+  const handleItemClick = (route) => {
+    onNavigate(route)
+    onClose()
+  }
+
+  return (
+    <div style={styles.menuOverlay}>
+      {/* Close button */}
+      <div 
+        style={styles.closeButton}
+        onClick={onClose}
+        onMouseEnter={(e) => {
+          e.target.style.background = 'rgba(212, 175, 55, 0.2)'
+          e.target.style.transform = 'scale(1.1)'
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = 'rgba(44, 62, 62, 0.8)'
+          e.target.style.transform = 'scale(1)'
+        }}
+      >
+        ×
+      </div>
+
+      {/* Menu title */}
+      <div style={styles.menuTitle}>Navigation</div>
+
+      {/* Menu items */}
+      {items.map((item, index) => (
+        <div
+          key={item.route}
+          style={{
+            ...styles.menuItem,
+            ...(hoveredItem === index ? styles.menuItemHover : {})
+          }}
+          onClick={() => handleItemClick(item.route)}
+          onMouseEnter={() => setHoveredItem(index)}
+          onMouseLeave={() => setHoveredItem(null)}
+        >
+          {item.title}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Hamburger Menu Button Component (always visible)
+const HamburgerMenuButton = ({ onClick }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      style={{
+        ...styles.hamburgerMenuButton,
+        ...(isHovered ? styles.hamburgerMenuButtonHover : {})
+      }}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setIsHovered(false)}
+    >
+      <div style={styles.hamburgerLine}></div>
+      <div style={styles.hamburgerLine}></div>
+      <div style={styles.hamburgerLine}></div>
+    </div>
+  )
+}
+
+// Invisible clickable box component
+const ClickableBox = ({ position, size, onItemClick, index, activeIndex }) => {
+  const meshRef = useRef()
+  
+  // Create invisible material that doesn't interfere with rendering
+  const invisibleMaterial = useMemo(() => {
+    const material = new THREE.MeshBasicMaterial({ 
+      transparent: true, 
+      opacity: 0,
+      visible: true,
+      // Ensure it doesn't write to depth buffer to avoid z-fighting
+      depthWrite: false,
+      // Render after other objects
+      renderOrder: 1000
+    })
+    return material
+  }, [])
+
+  return (
+    <mesh
+      ref={meshRef}
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation()
+        onItemClick(index)
+      }}
+      onPointerOver={(e) => {
+        document.body.style.cursor = 'pointer'
+        e.stopPropagation()
+      }}
+      onPointerOut={(e) => {
+        document.body.style.cursor = 'auto'
+        e.stopPropagation()
+      }}
+      // Ensure the mesh is behind the text
+      renderOrder={-1}
+    >
+      <boxGeometry args={size} />
+      <primitive object={invisibleMaterial} />
+    </mesh>
+  )
+}
+
 // Optimized GLB Carousel Model Component
 const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemClick }) => {
   const gltf = useLoader(GLTFLoader, url)
   const modelRef = useRef()
-  const { camera, gl } = useThree()
-  
-  // Memoize raycaster and mouse to avoid recreating
-  const raycastData = useMemo(() => ({
-    raycaster: new THREE.Raycaster(),
-    mouse: new THREE.Vector2()
-  }), [])
 
   useFrame((state) => {
     if (modelRef.current) {
       // Gentle rotation
-      modelRef.current.rotation.y = state.clock.elapsedTime * 0.5
+      modelRef.current.rotation.y = state.clock.elapsedTime * 0.3
     }
   })
-
-  // Optimized click handler with proper raycasting
-  const handleClick = useCallback((event) => {
-    if (!modelRef.current) return
-    
-    const rect = gl.domElement.getBoundingClientRect()
-    raycastData.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
-    raycastData.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-    
-    raycastData.raycaster.setFromCamera(raycastData.mouse, camera)
-    const intersects = raycastData.raycaster.intersectObjects(modelRef.current.children, true)
-    
-    if (intersects.length > 0) {
-      // Simple angle-based section detection
-      const angle = Math.atan2(raycastData.mouse.x, raycastData.mouse.y) + Math.PI
-      const normalizedAngle = angle / (Math.PI * 2)
-      const clickedIndex = Math.floor(normalizedAngle * items.length) % items.length
-      onItemClick(clickedIndex)
-    }
-  }, [camera, gl, items.length, onItemClick, raycastData])
 
   useEffect(() => {
     if (gltf.scene) {
@@ -170,19 +448,15 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
     }
   }, [gltf])
 
-  useEffect(() => {
-    gl.domElement.addEventListener('click', handleClick)
-    return () => gl.domElement.removeEventListener('click', handleClick)
-  }, [gl, handleClick])
-
   return (
     <group ref={modelRef} position={[.2, -.2, 0]}>
+      {/* The carousel model - no click handlers here */}
       <primitive object={gltf.scene} scale={[2, 2, 2]} />
       
-      {/* Text labels positioned closer to carousel elements with stacked characters */}
+      {/* Text labels with invisible clickable boxes */}
       {items.map((item, index) => {
         const angle = (index / items.length) * Math.PI * 2
-        const radius = 1.7 // Moved closer to carousel
+        const radius = 1.6 // Same radius as before
         const x = Math.sin(angle) * radius
         const z = Math.cos(angle) * radius
         
@@ -191,28 +465,44 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
         
         // Split title into individual characters and stack them vertically
         const characters = item.title.split('')
-        const totalHeight = characters.length * 0.08 // Decreased spacing between characters
+        const totalHeight = characters.length * 0.16 // Character spacing
         const startY = totalHeight / 4 // Center the stack
+        
+        // Calculate box size based on text dimensions
+        const boxWidth = 0.4  // Increased width of clickable area
+        const boxHeight = totalHeight + 0.6  // Height including more padding
+        const boxDepth = 0.1  // Slightly deeper clickable area
         
         return (
           <group key={item.title} position={[x, 0, z]} rotation={[0, yRotation, 0]}>
+            {/* Text characters - render these first */}
             {characters.map((char, charIndex) => (
               <Text
                 key={charIndex}
-                position={[0, startY - (charIndex * 0.16), 0]}
+                position={[0, startY - (charIndex * 0.16), 0.1]} // Moved text slightly forward
                 rotation={[0, 0, 0]}
                 fontSize={0.17}
                 color={activeIndex === index ? "#ffd700" : "#d4af37"}
                 fontFamily="serif"
                 anchorX="center"
                 anchorY="middle"
-                outlineWidth={0.01}
+                outlineWidth={0.008}
                 outlineColor="#2c3e3e"
-                onClick={() => onItemClick(index)}
+                // Ensure text renders on top
+                renderOrder={100}
               >
                 {char}
               </Text>
             ))}
+            
+            {/* Invisible clickable box positioned behind the text */}
+            <ClickableBox
+              position={[0, startY - (totalHeight / 2), 0]} // Positioned at text center
+              size={[boxWidth, boxHeight, boxDepth]}
+              onItemClick={onItemClick}
+              index={index}
+              activeIndex={activeIndex}
+            />
           </group>
         )
       })}
@@ -273,6 +563,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
     quality: 'high', 
     dpr: Math.min(window.devicePixelRatio, 2) 
   })
+  const [menuOpen, setMenuOpen] = useState(false)
   
   const { isMobile } = useResponsiveStyles()
 
@@ -314,6 +605,14 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
     setPerformanceSettings(settings)
   }, [])
 
+  const toggleMenu = useCallback(() => {
+    setMenuOpen(prev => !prev)
+  }, [])
+
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+  }, [])
+
   // Memoize camera settings - positioned to see the carousel
   const cameraSettings = useMemo(() => ({
     position: [6, -.5, 0],
@@ -338,6 +637,20 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
 
   return (
     <div style={styles.homepage}>
+      {/* Gold Flakes Background Animation */}
+      <GoldFlakes />
+
+      {/* Always Visible Hamburger Menu Button */}
+      <HamburgerMenuButton onClick={toggleMenu} />
+
+      {/* Menu Overlay */}
+      <MenuOverlay
+        isOpen={menuOpen}
+        onClose={closeMenu}
+        items={carouselItems}
+        onNavigate={onNavigate}
+      />
+
       {/* HTML Title and Author positioned above 3D area */}
       <div style={styles.titleContainer}>
         <h1 style={titleStyles}>
@@ -388,7 +701,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
       
       {/* Instruction text at bottom */}
       <div style={subtitleStyle}>
-        Drag to explore • Click sections to navigate
+        Click sections to navigate
       </div>
     </div>
   )
