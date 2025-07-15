@@ -630,7 +630,7 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, hoveredIn
   }
 
   return (
-    <group ref={modelRef} position={[0, -.2, 0]}>
+    <group ref={modelRef} position={[.2, -.2, 0]}>
       {/* The carousel model */}
       <primitive object={gltf.scene} scale={[2, 2, 2]} />
       
