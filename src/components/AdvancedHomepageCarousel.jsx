@@ -206,7 +206,7 @@ const styles = {
   
   subtitle: {
     position: 'absolute',
-    bottom: '100px',
+    bottom: '50px',
     left: '50%',
     transform: 'translateX(-50%)',
     fontSize: '0.8rem',
@@ -446,7 +446,7 @@ const HamburgerMenuButton = ({ onClick }) => {
 }
 
 // Invisible clickable box component
-const ClickableBox = ({ position, size, onItemClick, index, activeIndex }) => {
+const ClickableBox = ({ position, size, onItemClick, onItemHover, index, activeIndex, hoveredIndex }) => {
   const meshRef = useRef()
   
   // Create invisible material that doesn't interfere with rendering
@@ -455,10 +455,7 @@ const ClickableBox = ({ position, size, onItemClick, index, activeIndex }) => {
       transparent: true, 
       opacity: 0,
       visible: true,
-      // Ensure it doesn't write to depth buffer to avoid z-fighting
-      depthWrite: false,
-      // Render after other objects
-      renderOrder: 1000
+      depthWrite: false
     })
     return material
   }, [])
@@ -473,14 +470,14 @@ const ClickableBox = ({ position, size, onItemClick, index, activeIndex }) => {
       }}
       onPointerOver={(e) => {
         document.body.style.cursor = 'pointer'
+        if (onItemHover) onItemHover(index, true)
         e.stopPropagation()
       }}
       onPointerOut={(e) => {
         document.body.style.cursor = 'auto'
+        if (onItemHover) onItemHover(index, false)
         e.stopPropagation()
       }}
-      // Ensure the mesh is behind the text
-      renderOrder={-1}
     >
       <boxGeometry args={size} />
       <primitive object={invisibleMaterial} />
@@ -488,26 +485,91 @@ const ClickableBox = ({ position, size, onItemClick, index, activeIndex }) => {
   )
 }
 
-// Optimized GLB Carousel Model Component
-const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemClick }) => {
+// Enhanced Carousel Model with Smooth Animation Controls
+const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, hoveredIndex, onItemClick, onItemHover }) => {
   const gltf = useLoader(GLTFLoader, url)
   const modelRef = useRef()
+  
+  // Enhanced rotation control states
+  const rotationSpeed = useRef(0)         // Current rotation speed
+  const targetSpeed = useRef(0)           // Target rotation speed
+  const isInitializing = useRef(true)     // Flag for initial sequence
+  const initialStartTime = useRef(0)      // Start time for timing calculations
+  
+  // Animation phases
+  const PHASES = {
+    FAST_SPIN: 'fast_spin',      // Initial fast spinning (3 full rotations)
+    SLOW_DOWN: 'slow_down',      // Dramatic slowdown
+    NORMAL: 'normal'             // Normal hover-responsive operation
+  }
+  
+  const [currentPhase, setCurrentPhase] = useState(PHASES.FAST_SPIN)
 
-  useFrame((state) => {
-    if (modelRef.current) {
-      // Gentle rotation
-      modelRef.current.rotation.y = state.clock.elapsedTime * 0.3
+  useFrame((state, delta) => {
+    if (!modelRef.current) return
+    
+    const elapsedTime = state.clock.elapsedTime
+    
+    // Initialize start time on first frame
+    if (initialStartTime.current === 0) {
+      initialStartTime.current = elapsedTime
     }
+    
+    const timeSinceStart = elapsedTime - initialStartTime.current
+    
+    // Phase management and speed calculation
+    if (currentPhase === PHASES.FAST_SPIN) {
+      // Fast initial spin - 3 full rotations in 2.5 seconds
+      const fastSpinDuration = .5
+      const rotationsPerSecond = 3 / fastSpinDuration // 3 rotations in 2.5 seconds
+      targetSpeed.current = rotationsPerSecond * Math.PI * 2 // Convert to radians per second
+      
+      if (timeSinceStart >= fastSpinDuration) {
+        setCurrentPhase(PHASES.SLOW_DOWN)
+      }
+    } 
+    else if (currentPhase === PHASES.SLOW_DOWN) {
+      // Dramatic slowdown over 1.5 seconds with smooth easing
+      const slowDownStart = 1
+      const slowDownDuration = 1.5
+      const slowDownElapsed = timeSinceStart - slowDownStart
+      
+      if (slowDownElapsed >= slowDownDuration) {
+        setCurrentPhase(PHASES.NORMAL)
+        targetSpeed.current = 0.3 // Normal speed
+      } else {
+        // Smooth cubic ease-out from fast to normal speed
+        const progress = slowDownElapsed / slowDownDuration
+        const easedProgress = 1 - Math.pow(1 - progress, 3)
+        const fastSpeed = 3 / 2.5 * Math.PI * 2
+        const normalSpeed = 0.3
+        targetSpeed.current = fastSpeed - (fastSpeed - normalSpeed) * easedProgress
+      }
+    } 
+    else { // NORMAL phase
+      // Normal operation - responsive to hover
+      if (hoveredIndex !== undefined && hoveredIndex !== -1) {
+        targetSpeed.current = 0 // Stop on hover
+      } else {
+        targetSpeed.current = 0.3 // Normal rotation speed
+      }
+    }
+    
+    // Smooth interpolation to target speed
+    const lerpFactor = currentPhase === PHASES.NORMAL ? 0.05 : 0.02 // Slower lerp during initial sequence
+    rotationSpeed.current += (targetSpeed.current - rotationSpeed.current) * lerpFactor
+    
+    // Apply rotation
+    modelRef.current.rotation.y += rotationSpeed.current * delta
   })
 
   useEffect(() => {
-    if (gltf.scene) {
+    if (gltf?.scene) {
       // Optimize materials and setup shadows
       gltf.scene.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true
           child.receiveShadow = true
-          // Optimize materials for performance
           if (child.material) {
             child.material.needsUpdate = false
           }
@@ -516,60 +578,98 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
     }
   }, [gltf])
 
+  // Reset animation when component mounts
+  useEffect(() => {
+    setCurrentPhase(PHASES.FAST_SPIN)
+    rotationSpeed.current = 0
+    targetSpeed.current = 0
+    initialStartTime.current = 0
+    isInitializing.current = true
+  }, [])
+
+  if (!gltf?.scene) {
+    return null
+  }
+
   return (
-    <group ref={modelRef} position={[-1.1, -.2, 0]}>
-      {/* The carousel model - no click handlers here */}
+    <group ref={modelRef} position={[0, -.2, 0]}>
+      {/* The carousel model */}
       <primitive object={gltf.scene} scale={[2, 2, 2]} />
       
-      {/* Text labels with invisible clickable boxes */}
+      {/* Text labels with enhanced hover effects */}
       {items.map((item, index) => {
         const angle = (index / items.length) * Math.PI * 2
-        const radius = 1.6 // Same radius as before
+        const radius = 1.6
         const x = Math.sin(angle) * radius
         const z = Math.cos(angle) * radius
-        
-        // Make text face outward from carousel center
         const yRotation = angle
         
-        // Split title into individual characters and stack them vertically
         const characters = item.title.split('')
-        const totalHeight = characters.length * 0.16 // Character spacing
-        const startY = totalHeight / 4 // Center the stack
+        const totalHeight = characters.length * 0.16
+        const startY = totalHeight / 4
         
-        // Calculate box size based on text dimensions
-        const boxWidth = 0.4  // Increased width of clickable area
-        const boxHeight = totalHeight + 0.6  // Height including more padding
-        const boxDepth = 0.1  // Slightly deeper clickable area
+        const boxWidth = 0.4
+        const boxHeight = totalHeight + 0.6
+        const boxDepth = 0.1
+        
+        const isHovered = hoveredIndex === index
         
         return (
           <group key={item.title} position={[x, 0, z]} rotation={[0, yRotation, 0]}>
-            {/* Text characters - render these first */}
+            {/* Enhanced glow effect when hovered */}
+            {isHovered && (
+              <>
+                {/* Outer glow */}
+                <mesh position={[0, startY - (totalHeight / 2), -0.01]}>
+                  <boxGeometry args={[boxWidth * 1.4, boxHeight * 1.2, 0.01]} />
+                  <meshBasicMaterial 
+                    color="#d4af37" 
+                    transparent 
+                    opacity={0.1}
+                    blending={THREE.AdditiveBlending}
+                  />
+                </mesh>
+                {/* Inner glow */}
+                <mesh position={[0, startY - (totalHeight / 2), 0]}>
+                  <boxGeometry args={[boxWidth * 1.1, boxHeight * 1.05, 0.02]} />
+                  <meshBasicMaterial 
+                    color="#f4d03f" 
+                    transparent 
+                    opacity={0.2}
+                    blending={THREE.AdditiveBlending}
+                  />
+                </mesh>
+              </>
+            )}
+            
+            {/* Text characters with smooth hover transitions */}
             {characters.map((char, charIndex) => (
               <Text
                 key={charIndex}
-                position={[0, startY - (charIndex * 0.16), 0.1]} // Moved text slightly forward
+                position={[0, startY - (charIndex * 0.16), 0.1]}
                 rotation={[0, 0, 0]}
-                fontSize={0.17}
-                color={activeIndex === index ? "#ffd700" : "#d4af37"}
+                fontSize={isHovered ? 0.19 : 0.17} // Slightly larger when hovered
+                color={isHovered ? "#f4d03f" : "#d4af37"}
                 fontFamily="serif"
                 anchorX="center"
                 anchorY="middle"
-                outlineWidth={0.008}
+                outlineWidth={isHovered ? 0.012 : 0.008}
                 outlineColor="#2c3e3e"
-                // Ensure text renders on top
                 renderOrder={100}
               >
                 {char}
               </Text>
             ))}
             
-            {/* Invisible clickable box positioned behind the text */}
+            {/* Clickable area */}
             <ClickableBox
-              position={[0, startY - (totalHeight / 2), 0]} // Positioned at text center
+              position={[0, startY - (totalHeight / 2), 0]}
               size={[boxWidth, boxHeight, boxDepth]}
               onItemClick={onItemClick}
+              onItemHover={onItemHover}
               index={index}
               activeIndex={activeIndex}
+              hoveredIndex={hoveredIndex}
             />
           </group>
         )
@@ -578,11 +678,11 @@ const CarouselGLBModel = ({ url = '/carousel.glb', items, activeIndex, onItemCli
   )
 }
 
-// Main 3D Scene with just the carousel (no 3D title)
-const MainScene = ({ items, activeIndex, onItemClick }) => {
+// Main 3D Scene
+const MainScene = ({ items, activeIndex, hoveredIndex, onItemClick, onItemHover }) => {
   return (
     <>
-      {/* Optimized lighting setup */}
+      {/* Enhanced lighting for better visual effects */}
       <ambientLight intensity={0.6} />
       <directionalLight 
         position={[5, 10, 5]} 
@@ -593,13 +693,16 @@ const MainScene = ({ items, activeIndex, onItemClick }) => {
         shadow-camera-far={50}
       />
       <pointLight position={[-10, -10, -5]} intensity={0.6} color="#d4af37" />
+      {/* Additional rim lighting for hover effects */}
+      <pointLight position={[10, 5, 10]} intensity={0.3} color="#daa520" />
       
       <React.Suspense fallback={null}>
-        {/* Only the carousel model - title is now HTML */}
         <CarouselGLBModel 
           items={items}
           activeIndex={activeIndex}
+          hoveredIndex={hoveredIndex}
           onItemClick={onItemClick}
+          onItemHover={onItemHover}
         />
       </React.Suspense>
     </>
@@ -627,6 +730,7 @@ const PerformanceOptimizer = ({ onPerformanceChange }) => {
 // Main component
 const AdvancedHomepageCarousel = ({ onNavigate }) => {
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [performanceSettings, setPerformanceSettings] = useState({ 
     quality: 'high', 
     dpr: Math.min(window.devicePixelRatio, 2) 
@@ -635,7 +739,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
   
   const { isMobile } = useResponsiveStyles()
 
-  // Memoize carousel items to prevent unnecessary re-renders
+  // Memoize carousel items
   const carouselItems = useMemo(() => [
     {
       title: "Projects",
@@ -669,6 +773,10 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
     onNavigate(route)
   }, [carouselItems, onNavigate])
 
+  const handleItemHover = useCallback((index, isHovering) => {
+    setHoveredIndex(isHovering ? index : -1)
+  }, [])
+
   const handlePerformanceChange = useCallback((settings) => {
     setPerformanceSettings(settings)
   }, [])
@@ -681,13 +789,13 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
     setMenuOpen(false)
   }, [])
 
-  // Memoize camera settings - positioned to see the carousel
+  // Camera settings
   const cameraSettings = useMemo(() => ({
     position: [6, -.5, 0],
     fov: isMobile ? 80 : 50
   }), [isMobile])
 
-  // Get responsive styles
+  // Responsive styles
   const titleContainerStyles = {
     ...styles.titleContainer,
     ...(isMobile ? styles.mobile.titleContainer : {})
@@ -713,7 +821,7 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
       {/* Gold Flakes Background Animation */}
       <GoldFlakes />
 
-      {/* Always Visible Hamburger Menu Button */}
+      {/* Hamburger Menu */}
       <HamburgerMenuButton onClick={toggleMenu} />
 
       {/* Menu Overlay */}
@@ -724,18 +832,14 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
         onNavigate={onNavigate}
       />
 
-      {/* HTML Title and Author positioned above 3D area */}
+      {/* Title Section */}
       <div style={titleContainerStyles}>
-        <h1 style={titleStyles}>
-          Sundai
-        </h1>
+        <h1 style={titleStyles}>Sundai</h1>
         <div style={styles.separator}></div>
-        <p style={authorStyles}>
-          By Christian Okeke
-        </p>
+        <p style={authorStyles}>By Christian Okeke</p>
       </div>
       
-      {/* 3D Canvas with just the carousel */}
+      {/* 3D Canvas */}
       <Canvas 
         camera={cameraSettings}
         shadows={performanceSettings.quality === 'high'}
@@ -753,7 +857,9 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
         <MainScene
           items={carouselItems}
           activeIndex={activeIndex}
+          hoveredIndex={hoveredIndex}
           onItemClick={handleItemClick}
+          onItemHover={handleItemHover}
         />
         <OrbitControls 
           enablePan={false} 
@@ -772,9 +878,9 @@ const AdvancedHomepageCarousel = ({ onNavigate }) => {
         />
       </Canvas>
       
-      {/* Instruction text at bottom */}
+      {/* Instructions */}
       <div style={subtitleStyle}>
-        Click sections to navigate
+        Hover to pause • Click sections to navigate
       </div>
     </div>
   )
