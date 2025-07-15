@@ -224,7 +224,7 @@ const styles = {
     boxSizing: 'border-box'
   },
   
-  // Mobile styles
+  // Enhanced Mobile styles
   mobile: {
     titleContainer: {
       top: '8%',
@@ -241,13 +241,34 @@ const styles = {
       bottom: '60px',
       padding: '0 1rem'
     },
-    menuItem: {
-      padding: '15px 30px',
-      fontSize: '1.5rem',
-      minWidth: '160px'
-    },
+    // Enhanced mobile menu styles
     menuTitle: {
-      fontSize: '2rem'
+      fontSize: '1.8rem',          // Smaller title
+      marginBottom: '30px'         // Less margin
+    },
+    menuItem: {
+      padding: '12px 25px',        // Smaller padding
+      margin: '6px 0',             // Less margin between items
+      fontSize: '1.3rem',          // Smaller font
+      minWidth: '140px',           // Smaller minimum width
+      borderRadius: '8px'          // Smaller border radius
+    },
+    // Additional mobile-specific menu styles
+    menuOverlay: {
+      padding: '20px'              // Add some padding to the overlay
+    },
+    hamburgerMenuButton: {
+      width: '44px',               // Slightly smaller button
+      height: '44px',
+      padding: '10px'
+    },
+    hamburgerLine: {
+      width: '18px'                // Slightly shorter lines
+    },
+    closeButton: {
+      width: '44px',               // Smaller close button
+      height: '44px',
+      fontSize: '1.8rem'
     }
   }
 }
@@ -364,7 +385,7 @@ const useResponsiveStyles = () => {
   return { isMobile }
 }
 
-// Menu Overlay Component
+// Menu Overlay Component with Mobile Optimizations
 const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
   const [hoveredItem, setHoveredItem] = useState(null)
   const { isMobile } = useResponsiveStyles()
@@ -377,10 +398,16 @@ const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
   }
 
   return (
-    <div style={styles.menuOverlay}>
+    <div style={{
+      ...styles.menuOverlay,
+      ...(isMobile ? styles.mobile.menuOverlay : {})
+    }}>
       {/* Close button */}
       <div 
-        style={styles.closeButton}
+        style={{
+          ...styles.closeButton,
+          ...(isMobile ? styles.mobile.closeButton : {})
+        }}
         onClick={onClose}
         onMouseEnter={(e) => {
           e.target.style.background = 'rgba(212, 175, 55, 0.2)'
@@ -422,14 +449,16 @@ const MenuOverlay = ({ isOpen, onClose, items, onNavigate }) => {
   )
 }
 
-// Hamburger Menu Button Component (always visible)
+// Hamburger Menu Button Component with Mobile Optimizations
 const HamburgerMenuButton = ({ onClick }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const { isMobile } = useResponsiveStyles()
 
   return (
     <div
       style={{
         ...styles.hamburgerMenuButton,
+        ...(isMobile ? styles.mobile.hamburgerMenuButton : {}),
         ...(isHovered ? styles.hamburgerMenuButtonHover : {})
       }}
       onClick={onClick}
@@ -438,9 +467,18 @@ const HamburgerMenuButton = ({ onClick }) => {
       onTouchStart={() => setIsHovered(true)}
       onTouchEnd={() => setIsHovered(false)}
     >
-      <div style={styles.hamburgerLine}></div>
-      <div style={styles.hamburgerLine}></div>
-      <div style={styles.hamburgerLine}></div>
+      <div style={{
+        ...styles.hamburgerLine,
+        ...(isMobile ? styles.mobile.hamburgerLine : {})
+      }}></div>
+      <div style={{
+        ...styles.hamburgerLine,
+        ...(isMobile ? styles.mobile.hamburgerLine : {})
+      }}></div>
+      <div style={{
+        ...styles.hamburgerLine,
+        ...(isMobile ? styles.mobile.hamburgerLine : {})
+      }}></div>
     </div>
   )
 }
